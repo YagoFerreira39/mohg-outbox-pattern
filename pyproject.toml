@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "mohg-outbox-pattern"
+version = "0.1.0"
+description = ""
+authors = ["Yago Ferreira <yagojj@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+uvicorn = "^0.32.1"
+fastapi = "^0.115.6"
+python-decouple = "^3.8"
+pyfiglet = "^1.0.2"
+witch-doctor = "^1.2.0"
+meeseeks-singleton = "^0.4.4"
+loglifos = "^0.2.1"
+motor = "^3.6.0"
+python-dateutil = "^2.9.0"
+dependency-injector = "^4.44.0"
+kafka-python = "^2.0.2"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
