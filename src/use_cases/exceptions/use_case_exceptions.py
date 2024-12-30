@@ -19,3 +19,8 @@ class MalformedRequestInputException(UseCaseBaseException):
 class UnableToRegisterRentalException(UseCaseBaseException):
     _reason = UseCaseExceptionsReasonsEnum.UNABLE_TO_REGISTER_RENTAL_ERROR
     _http_status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+class UnableToSendEventToQueueException(UseCaseBaseException):
+    _reason = UseCaseExceptionsReasonsEnum.UNABLE_TO_SEND_EVENT_TO_QUEUE_ERROR
+    _http_status_code = HTTPStatus.INTERNAL_SERVER_ERROR

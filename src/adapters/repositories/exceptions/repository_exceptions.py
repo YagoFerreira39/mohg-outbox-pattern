@@ -12,3 +12,7 @@ class FailToRetrieveInformationException(RepositoryBaseException):
 
 class FailToInsertException(RepositoryBaseException):
     _reason = RepositoryExceptionsReasonsEnum.FAIL_TO_INSERT_ERROR
+
+
+class RepositoryUnexpectedException(RepositoryBaseException):
+    _reason = RepositoryExceptionsReasonsEnum.UNEXPECTED_ERROR

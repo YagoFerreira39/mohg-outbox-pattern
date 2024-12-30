@@ -1,6 +1,7 @@
 import asyncio
 from http import HTTPStatus
 
+import loglifos
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Depends
 from src.externals.infrastructure.ioc_container.mohg_ioc_container_config_infrastructure import (
@@ -15,6 +16,7 @@ from src.use_cases.data_types.responses.register_rental_response import (
 from src.use_cases.data_types.router_requests.register_rental_router_request import (
     RegisterRentalRouterRequest,
 )
+from src.use_cases.publishers.rental_events_publisher import RentalEventsPublisher
 
 
 class RentalRouter(Router):
@@ -44,5 +46,13 @@ class RentalRouter(Router):
 
     @staticmethod
     @__rental_router.on_event("startup")
-    async def startup_event():
-        pass
+    @inject
+    async def startup_event(
+        rental_events_publisher: RentalEventsPublisher = Depends(
+            Provide[MohgIocContainerConfigInfrastructure.rental_events_publisher]
+        ),
+    ) -> None:
+        try:
+            await rental_events_publisher.publish_register_rental_events()
+        except Exception as exception:
+            loglifos.error(msg=f"Failed to publish rental events: {exception}")
