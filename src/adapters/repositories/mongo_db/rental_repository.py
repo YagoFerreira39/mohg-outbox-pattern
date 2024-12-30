@@ -1,7 +1,6 @@
 from decouple import config
-from motor.motor_asyncio import AsyncIOMotorClientSession
+from motor.motor_asyncio import AsyncIOMotorClientSession, AsyncIOMotorCollection
 from pymongo.results import InsertOneResult
-from pymongo.synchronous.client_session import ClientSession
 from witch_doctor import WitchDoctor
 
 from src.adapters.ports.infrastructure.mongo_db.i_mongo_db_collection import (
@@ -12,7 +11,9 @@ from src.adapters.ports.infrastructure.mongo_db.i_mongo_db_infrastructure import
 )
 from src.adapters.repositories.exceptions.repository_exceptions import (
     FailToInsertException,
+    FailToRetrieveInformationException,
 )
+from src.domain.models.rental_event_model import RentalEventModel
 from src.domain.models.rental_model import RentalModel
 from src.externals.infrastructure.mongo_db.exceptions.mongo_db_base_infrastructure_exception import (
     MongoDbBaseInfrastructureException,
@@ -69,18 +70,44 @@ class RentalRepository(IRentalRepository):
                     event_model = cls.__rental_extension.create_rental_event_model(
                         model=inserted_model
                     )
-                    inserted_event_result: InsertOneResult = (
-                        await rental_event_collection.insert_one(
-                            event_model.to_insert()
-                        )
-                    )
-                    inserted_event_model = event_model
-                    inserted_event_model.id_ = inserted_event_result.inserted_id
+
+                    await rental_event_collection.insert_one(event_model.to_insert())
 
             return inserted_model
 
         except MongoDbBaseInfrastructureException as original_exception:
             raise FailToInsertException(
-                message="Failed to insert user's profile in database.",
+                message="Failed to register rental in database.",
+                original_error=original_exception,
+            ) from original_exception
+
+        finally:
+            await session.end_session()
+
+    @classmethod
+    async def get_rental_events_by_status(cls, status: str) -> list[RentalEventModel]:
+        try:
+            async with cls.__rental_event_collection.with_collection() as rental_event_collection:
+                collection: AsyncIOMotorCollection
+
+                query = {"status": status}
+
+                pending_events = (
+                    await rental_event_collection.find(query)
+                    .limit(10)
+                    .to_list(length=None)
+                )
+
+                rental_event_model_list = (
+                    cls.__rental_extension.from_database_result_to_event_model_list(
+                        result_list=pending_events
+                    )
+                )
+
+                return rental_event_model_list
+
+        except MongoDbBaseInfrastructureException as original_exception:
+            raise FailToRetrieveInformationException(
+                message="Failed to retrieve rental events in database.",
                 original_error=original_exception,
             ) from original_exception
