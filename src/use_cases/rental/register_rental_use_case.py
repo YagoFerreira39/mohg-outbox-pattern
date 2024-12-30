@@ -23,6 +23,9 @@ from src.use_cases.ports.extensions.i_register_rental_extension import (
     IRegisterRentalExtension,
 )
 from src.use_cases.ports.extensions.i_rental_extension import IRentalExtension
+from src.use_cases.ports.repositories.mongo_db.i_rental_repository import (
+    IRentalRepository,
+)
 from src.use_cases.ports.use_cases.rental.i_register_rental_use_case import (
     IRegisterRentalUseCase,
 )
@@ -31,18 +34,18 @@ from src.use_cases.ports.use_cases.rental.i_register_rental_use_case import (
 class RegisterRentalUseCase(IRegisterRentalUseCase):
     __rental_extension: IRentalExtension
     __register_rental_extension: IRegisterRentalExtension
-    # __rental_repository: IUserRepository
+    __rental_repository: IRentalRepository
 
     @WitchDoctor.injection
     def __init__(
         self,
         rental_extension: IRentalExtension,
         register_rental_extension: IRegisterRentalExtension,
-        # rental_repository: IUserRepository,
+        rental_repository: IRentalRepository,
     ):
         RegisterRentalUseCase.__rental_extension = rental_extension
         RegisterRentalUseCase.__register_rental_extension = register_rental_extension
-        # RegisterRentalUseCase.__rental_repository = rental_repository
+        RegisterRentalUseCase.__rental_repository = rental_repository
 
     @classmethod
     async def register_rental(cls, request: RegisterRentalRequest) -> RegisterRentalDto:
@@ -51,7 +54,7 @@ class RegisterRentalUseCase(IRegisterRentalUseCase):
 
             model = cls.__create_rental_model(entity=entity)
 
-            inserted_model = await cls.__insert_user(model=model)
+            inserted_model = await cls.__register_rental(model=model)
 
             dto = cls.__create_user_dto(model=inserted_model)
 
@@ -100,11 +103,11 @@ class RegisterRentalUseCase(IRegisterRentalUseCase):
             ) from original_exception
 
     @classmethod
-    async def __insert_user(cls, model: RentalModel) -> RentalModel:
+    async def __register_rental(cls, model: RentalModel) -> RentalModel:
         try:
-            # inserted_model = await cls.__rental_repository.register_user(model=model)
+            inserted_model = await cls.__rental_repository.register_rental(model=model)
 
-            return model
+            return inserted_model
 
         except RepositoryBaseException as original_exception:
             raise UnableToRegisterRentalException(

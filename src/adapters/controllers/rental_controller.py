@@ -26,8 +26,6 @@ class RentalController:
     async def register_rental(
         self,
         router_request: RegisterRentalRouterRequest,
-        # register_rental_use_case: IRegisterRentalUseCase,
-        # register_rental_extension: IRegisterRentalExtension,
     ) -> RegisterRentalResponse:
         request = self.__register_rental_extension.from_router_request_to_request(
             router_request=router_request

@@ -11,6 +11,7 @@ from src.externals.infrastructure.kafka.kafka_infrastructure import KafkaInfrast
 from src.externals.infrastructure.mongo_db.mongo_db_infrastructure import (
     MongoDbInfrastructure,
 )
+from src.use_cases.publishers.rental_events_publisher import RentalEventsPublisher
 from src.use_cases.rental.register_rental_use_case import RegisterRentalUseCase
 
 
@@ -40,6 +41,12 @@ class MohgIocContainerConfigInfrastructure(containers.DeclarativeContainer):
         RegisterRentalUseCase,
         rental_extension=rental_extension,
         register_rental_extension=register_rental_extension,
+    )
+    rental_events_publisher = providers.Singleton(
+        RentalEventsPublisher,
+        rental_extension=rental_extension,
+        rental_repository=rental_repository,
+        kafka_rental_events_repository=kafka_rental_events_repository,
     )
 
     # Controllers
